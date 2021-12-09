@@ -13,11 +13,11 @@ Mix.install([
 <!-- livebook:{"reevaluate_automatically":true} -->
 
 ```elixir
-input = Kino.Input.text("Please enter your Input")
+input = Kino.Input.textarea("Please enter your Input")
 ```
 
 ```elixir
-line =
+input =
   input
   |> Kino.Input.read()
 ```
