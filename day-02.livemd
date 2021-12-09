@@ -1,0 +1,94 @@
+# Day 02
+
+## Setup
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.1"}
+])
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input = Kino.Input.textarea()("Please enter your Input")
+```
+
+```elixir
+input =
+  input
+  |> Kino.Input.read()
+  |> String.split()
+  |> Enum.chunk_every(2, 2)
+  |> Enum.map(fn [direction, distance] ->
+    %{direction: direction, distance: String.to_integer(distance)}
+  end)
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Part1 do
+  def navigate(instructions, location \\ %{horizontal: 0, depth: 0})
+  def navigate([], location), do: location
+
+  def navigate([%{direction: "forward", distance: distance} | rest], location) do
+    navigate(rest, %{horizontal: location.horizontal + distance, depth: location.depth})
+  end
+
+  def navigate([%{direction: "up", distance: distance} | rest], location) do
+    navigate(rest, %{horizontal: location.horizontal, depth: location.depth - distance})
+  end
+
+  def navigate([%{direction: "down", distance: distance} | rest], location) do
+    navigate(rest, %{horizontal: location.horizontal, depth: location.depth + distance})
+  end
+end
+
+location = Part1.navigate(input)
+
+location.depth * location.horizontal
+```
+
+## Part 2
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Part2 do
+  def navigate(instructions, location \\ %{horizontal: 0, depth: 0, aim: 0})
+  def navigate([], location), do: location
+
+  def navigate([%{direction: "forward", distance: distance} | rest], location) do
+    navigate(rest, %{
+      horizontal: location.horizontal + distance,
+      depth: location.depth + location.aim * distance,
+      aim: location.aim
+    })
+  end
+
+  def navigate([%{direction: "up", distance: distance} | rest], location) do
+    navigate(rest, %{
+      horizontal: location.horizontal,
+      depth: location.depth,
+      aim: location.aim - distance
+    })
+  end
+
+  def navigate([%{direction: "down", distance: distance} | rest], location) do
+    navigate(rest, %{
+      horizontal: location.horizontal,
+      depth: location.depth,
+      aim: location.aim + distance
+    })
+  end
+end
+
+location = Part2.navigate(input)
+
+location.depth * location.horizontal
+```
