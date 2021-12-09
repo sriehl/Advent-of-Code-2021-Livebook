@@ -1,0 +1,35 @@
+# Day 01
+
+## Part 1
+
+```elixir
+input = """
+199
+200
+208
+210
+200
+207
+240
+269
+260
+263
+"""
+
+input
+|> String.split("\n", trim: true)
+|> Enum.map(&String.to_integer/1)
+|> Enum.chunk_every(2, 1, :discard)
+|> Enum.count(fn [left, right] -> left < right end)
+```
+
+## Part 2
+
+```elixir
+input
+|> String.split("\n", trim: true)
+|> Enum.map(&String.to_integer/1)
+|> Enum.chunk_every(3, 1, :discard)
+|> Enum.chunk_every(2, 1, :discard)
+|> Enum.count(fn [left, right] -> Enum.sum(right) > Enum.sum(left) end)
+```

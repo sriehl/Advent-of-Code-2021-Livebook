@@ -1,0 +1,62 @@
+# Day 06
+
+## Setup
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.1"}
+])
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input = Kino.Input.textarea("Please enter your Input")
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+fishes =
+  input
+  |> Kino.Input.read()
+  |> String.trim()
+  |> String.split(",", trim: true)
+  |> Enum.map(&String.to_integer/1)
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Recursion1 do
+  def recur(fishes), do: recur(fishes, [])
+  defp recur([0 | fishes], children), do: [6 | recur(fishes, [8 | children])]
+  defp recur([fish | fishes], children), do: [fish - 1 | recur(fishes, children)]
+  defp recur([], children), do: children
+end
+
+1..80
+|> Enum.reduce(fishes, fn _, fishes -> Recursion1.recur(fishes) end)
+|> length()
+```
+
+## Part 2
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Recursion2 do
+  def recur({day0, day1, day2, day3, day4, day5, day6, day7, day8}) do
+    {day1, day2, day3, day4, day5, day6, day7 + day0, day8, day0}
+  end
+end
+
+frequencies = Enum.frequencies(fishes)
+amounts = Enum.map(0..8, fn i -> frequencies[i] || 0 end) |> List.to_tuple()
+
+1..256
+|> Enum.reduce(amounts, fn _, amounts -> Recursion2.recur(amounts) end)
+|> Tuple.sum()
+```

@@ -1,0 +1,118 @@
+# Day 05
+
+## Setup
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.1"},
+  {:vega_lite, "~> 0.1.2"}
+])
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input = Kino.Input.textarea("Please enter your Input")
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn line ->
+    line
+    |> String.split([",", " -> "])
+    |> Enum.map(&String.to_integer/1)
+  end)
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Counter1 do
+  def lines(lines) do
+    lines
+    |> Enum.reduce(%{}, fn
+      [x, y1, x, y2], grid ->
+        Enum.reduce(y1..y2, grid, fn y, grid ->
+          Map.update(grid, {x, y}, 1, &(&1 + 1))
+        end)
+
+      [x1, y, x2, y], grid ->
+        Enum.reduce(x1..x2, grid, fn x, grid ->
+          Map.update(grid, {x, y}, 1, &(&1 + 1))
+        end)
+
+      _, grid ->
+        grid
+    end)
+    |> Enum.count(fn {_, v} -> v > 1 end)
+  end
+end
+
+Counter1.lines(lines)
+```
+
+## Part 2
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Counter2 do
+  def lines(lines) do
+    lines
+    |> Enum.reduce(%{}, fn
+      [x, y1, x, y2], grid ->
+        Enum.reduce(y1..y2, grid, fn y, grid ->
+          Map.update(grid, {x, y}, 1, &(&1 + 1))
+        end)
+
+      [x1, y, x2, y], grid ->
+        Enum.reduce(x1..x2, grid, fn x, grid ->
+          Map.update(grid, {x, y}, 1, &(&1 + 1))
+        end)
+
+      [x1, y1, x2, y2], grid ->
+        Enum.reduce(Enum.zip(x1..x2, y1..y2), grid, fn point, grid ->
+          Map.update(grid, point, 1, &(&1 + 1))
+        end)
+
+      _, grid ->
+        grid
+    end)
+    |> Enum.count(fn {_, v} -> v > 1 end)
+  end
+end
+
+Counter2.lines(lines)
+```
+
+## Vegalite
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+lines_data =
+  lines
+  |> Enum.flat_map(fn
+    [x, y1, x, y2] -> Enum.zip(Stream.cycle([x]), y1..y2)
+    [x1, y, x2, y] -> Enum.zip(x1..x2, Stream.cycle([y]))
+    [x1, y1, x2, y2] -> Enum.zip(x1..x2, y1..y2)
+  end)
+  |> Enum.map(fn {x, y} -> %{x: x, y: y} end)
+
+alias VegaLite, as: Vl
+
+Vl.new(width: 600, height: 600)
+|> Vl.data_from_values(lines_data)
+|> Vl.mark(:circle)
+|> Vl.encode_field(:x, "x", axis: [title: "x"], bin: [maxbins: 50])
+|> Vl.encode_field(:y, "y", axis: [title: "y"], bin: [maxbins: 50])
+|> Vl.encode(:size, aggregate: :count)
+|> Vl.encode(:color, aggregate: :count, scale: [range: ["green", "red"]])
+```
