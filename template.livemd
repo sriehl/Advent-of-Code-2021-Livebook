@@ -16,6 +16,8 @@ Mix.install([
 input = Kino.Input.textarea("Please enter your Input")
 ```
 
+<!-- livebook:{"reevaluate_automatically":true} -->
+
 ```elixir
 input =
   input
