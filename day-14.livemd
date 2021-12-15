@@ -1,0 +1,88 @@
+# Day - 14
+
+## Setup
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.1"}
+])
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input = Kino.Input.textarea("Please enter your Input")
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+[template | lines] =
+  input
+  |> Kino.Input.read()
+  |> String.split(["\n"], trim: true)
+
+template =
+  template
+  |> String.to_charlist()
+  |> Enum.chunk_every(2, 1, [0])
+  |> Enum.frequencies()
+
+pairs = Map.new(lines, fn <<i1, i2, " -> ", o>> -> {[i1, i2], o} end)
+
+:ok
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+{{_, mins}, {_, maxes}} =
+  1..10
+  |> Enum.reduce(template, fn _, template ->
+    Enum.reduce(template, %{}, fn {[i1, i2] = pair, count}, acc ->
+      case pairs do
+        %{^pair => o} ->
+          acc
+          |> Map.update([i1, o], count, &(&1 + count))
+          |> Map.update([o, i2], count, &(&1 + count))
+
+        %{} ->
+          Map.put(acc, pair, count)
+      end
+    end)
+  end)
+  |> Enum.group_by(&hd(elem(&1, 0)), &elem(&1, 1))
+  |> Enum.min_max_by(fn {_, counts} -> Enum.sum(counts) end)
+
+Enum.sum(maxes) - Enum.sum(mins)
+```
+
+## Part 2
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+{{_, mins}, {_, maxes}} =
+  1..40
+  |> Enum.reduce(template, fn _, template ->
+    Enum.reduce(template, %{}, fn {[i1, i2] = pair, count}, acc ->
+      case pairs do
+        %{^pair => o} ->
+          acc
+          |> Map.update([i1, o], count, &(&1 + count))
+          |> Map.update([o, i2], count, &(&1 + count))
+
+        %{} ->
+          Map.put(acc, pair, count)
+      end
+    end)
+  end)
+  |> Enum.group_by(&hd(elem(&1, 0)), &elem(&1, 1))
+  |> Enum.min_max_by(fn {_, counts} -> Enum.sum(counts) end)
+
+Enum.sum(maxes) - Enum.sum(mins)
+```
